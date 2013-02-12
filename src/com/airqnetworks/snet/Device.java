@@ -1,5 +1,7 @@
 package com.airqnetworks.snet;
-
+/**
+ * Prova di documentazione
+ */
 interface Device {
     public void open();
     public void close();
