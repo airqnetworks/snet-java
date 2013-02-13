@@ -78,28 +78,29 @@ public class SerialDevice implements Device {
     private int timeout;
     
     public SerialDevice(String port) throws NoSuchPortException {
-        this.portName = port;
-        this.baudrate = 19200;
-        this.timeout = 2000;
-        this.portIdentifer = CommPortIdentifier.getPortIdentifier(this.portName);
+        portName = port;
+        baudrate = 19200;
+        timeout = 2000;
+        portIdentifer = CommPortIdentifier.getPortIdentifier(portName);
     }
 
     public SerialDevice(String port, int baudrate) throws NoSuchPortException {
         this(port);
-        this.baudrate = 19200;
+        baudrate = 19200;
     }
     
     public SerialDevice(String port, int baudrate, int timeout) throws NoSuchPortException {
         this(port, baudrate);
-        this.timeout = timeout;
+        timeout = timeout;
     }
 
     public void connect() throws PortInUseException, IOException {
-        if(!this.portIdentifer.isCurrentlyOwned())
+        if(!portIdentifer.isCurrentlyOwned())
         {
-           port = (SerialPort)this.portIdentifer.open(this.getClass().getName(), this.timeout);
+           port = (SerialPort)portIdentifer.open(getClass().getName(), timeout);
             try {
-                port.setSerialPortParams(this.baudrate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+                port.setSerialPortParams(baudrate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+                port.enableReceiveTimeout(timeout);
                 in = port.getInputStream();
                 out = port.getOutputStream();
                 
@@ -117,7 +118,7 @@ public class SerialDevice implements Device {
 
     public int read(byte[] b) throws IOException{
         try {
-            return in.read(b);
+            return in.read(b, 0, 1);
         } catch (NullPointerException e) {
             return 0;
         }

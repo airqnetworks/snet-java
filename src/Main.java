@@ -14,10 +14,22 @@ public class Main {
             System.out.println(SerialDevice.getPortDescription(ports.nextElement()));
         }
         
-        SerialDevice port = new SerialDevice("/dev/tty.usbserial");
+        SerialDevice port = new SerialDevice("/dev/tty.usbserial-FTC8JJO1");
         Driver drv = new Driver(port);
         drv.start();
         while(counter < 5) {
+            try {
+                while (true) {
+                    DataMessage message = drv.messages.remove();
+                    System.out.println("Len: " + message.length);
+                    System.out.println("RSSI: " + message.getRSSI());                    
+                    System.out.println("Packet Number: " + message.getPacketNumber());
+                    System.out.println("Device ID: " + new String(message.getDeviceID(), 0, 4));                    
+                    System.out.println("Device Type: " + message.getDeviceType());
+                }
+            } catch (java.util.NoSuchElementException e) {
+                
+            }
             counter++;
             Thread.sleep(1000);
         }

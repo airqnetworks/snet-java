@@ -13,8 +13,8 @@
 package com.airqnetworks.snet;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -25,30 +25,32 @@ public class Driver implements Runnable {
     private Thread innerThread = null;
     private Boolean wantClose = false;
     private Device device;
+    public LinkedBlockingQueue<DataMessage> messages;
     
     public Driver(Device dev) {
-        this.device = dev;
+        device = dev;
+        messages = new LinkedBlockingQueue<DataMessage>();
     }
     
     public void start() {
-        this.innerThread = new Thread(this, "Driver thread");
-        this.innerThread.start();
-        this.wantClose = false;
+        innerThread = new Thread(this, "Driver thread");
+        innerThread.start();
+        wantClose = false;
         try {
-            this.device.connect();
+            device.connect();
         } catch (Exception ex) {
             
         }
     }
 
     public void stop() {
-        this.wantClose = true;
+        wantClose = true;
         try {
-            this.innerThread.join();
+            innerThread.join();
         } catch (InterruptedException ex) {
         
         }
-        this.device.close();
+        device.close();
     }
 
     /**
@@ -56,15 +58,18 @@ public class Driver implements Runnable {
      * @param dev
      * @return 
      */
-    protected static int readSNETMessage(Device dev, byte[] message) throws Exception {
+    protected int readSNETMessage(Device dev, byte[] message) throws Exception {
         int i = 0;
         int len = 0;
         Boolean checkEnd = false;
         byte[] serData = new byte[1];
         String preamble;
         
-        while(true) {
+        while(!wantClose) {
             len = dev.read(serData);
+            if(i >= message.length) /* Avoid buffer overrun */
+                return -1;
+            
             if(len > 0) {
                 message[i] = serData[0];
                 if(serData[0] == '\n') {
@@ -83,6 +88,11 @@ public class Driver implements Runnable {
                 i++;
             }
         }
+        return -1;
+    }
+    
+    public void onData() {
+
     }
     
     @Override
@@ -91,16 +101,13 @@ public class Driver implements Runnable {
         int len = 0;
         DataMessage message;
         String deviceid;
-        while(!this.wantClose) {
+        while(!wantClose) {
             try {
-                len = Driver.readSNETMessage(this.device, data);
+                len = readSNETMessage(device, data);
                 if(len > 0) {
                     message = MessageHandler.message(data, len, this);
-                    System.out.println("Len: " + message.length);
-                    System.out.println("RSSI: " + message.getRSSI());                    
-                    System.out.println("Packet Number: " + message.getPacketNumber());
-                    System.out.println("Device ID: " + new String(message.getDeviceID(), 0, 4));                    
-                    System.out.println("Device ID: " + message.getDeviceID()[0]);
+                    messages.add(message);
+                    onData();
                 }
             } catch (IOException ex) {
                 

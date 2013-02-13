@@ -51,6 +51,11 @@ public class DataMessage {
         return devaddr;
     }
     
+    public int getDeviceType()
+    {
+        return getDeviceID()[0];
+    }
+    
     public int getPacketNumber() {
         return this.rawmessage[DataMessage.MSG_PKT];
     }
