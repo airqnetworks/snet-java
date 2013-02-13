@@ -29,60 +29,29 @@
 
 package com.airqnetworks.snet;
 
+import java.util.EventObject;
+
 /**
  *
  * @author cnoviello
  */
-public class AIRQ300Message extends DataMessage {
-    protected static final byte IN1_MASK    = 0x1;
-    protected static final byte IN2_MASK    = 0x2;
-    protected static final byte IN3_MASK    = 0x4;
-    protected static final byte IN4_MASK    = 0x8;
-    protected static final byte RELAY1_MASK = 0x10;
-    protected static final byte RELAY2_MASK = 0x20;
-    protected static final byte POWER_MASK  = 0x40;
-    private   static final int MSG_DATA_LEN = 1; /* Use getDataLen() instead of this */
-            
-    public AIRQ300Message(byte[] message, int len, SNETDriver driver) {
-        super(message, len, driver);
+public class SNETDriverEvent extends EventObject {  
+    
+    private DataMessage message;
+    private SNETDriver driver;
+    
+    public SNETDriverEvent(SNETDriver srcdriver, DataMessage message) {
+        super(message);
+        this.message = message;
+        this.driver = srcdriver;
     }
     
-    public int getDataLen() {
-        return AIRQ300Message.MSG_DATA_LEN;
-    }
-    
-    public Boolean getIOStatus(byte mask) {
-        Object data = getData(0);
-        return (((Byte)data) & mask) == mask;
+    public SNETDriver getDriver() {
+        return this.driver;
     }
 
-    public Boolean getIN1() {
-        return getIOStatus(IN1_MASK);
+    public DataMessage getMessage() {
+        return this.message;
     }
-
-    public Boolean getIN2() {
-        return getIOStatus(IN2_MASK);
-    }
-    
-    public Boolean getIN3() {
-        return getIOStatus(IN3_MASK);
-    }
-    
-    public Boolean getIN4() {
-        return getIOStatus(IN1_MASK);
-    }
-    
-    public Boolean getPOWER() {
-        return getIOStatus(POWER_MASK);
-    }
-    
-    public Boolean getRELAY1() {
-        return getIOStatus(RELAY1_MASK);
-    }
-    
-    public Boolean getRELAY2() {
-        return getIOStatus(RELAY2_MASK);
-    }
-
-   
 }
+

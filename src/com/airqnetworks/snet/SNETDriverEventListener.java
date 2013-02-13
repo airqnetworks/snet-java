@@ -27,37 +27,16 @@
  * Carmine Noviello    13/2/13	Original
  */
 
-import com.airqnetworks.snet.*;
+package com.airqnetworks.snet;
 
-import gnu.io.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.EventListener;
 
-public class Main implements SNETDriverEventListener {
-    public static void main(String[] args) throws Exception{
-        byte buffer[] = new byte[1024];
-        int len = 0;
-        int counter = 0;
-        
-        Enumeration<CommPortIdentifier> ports = SerialDevice.listPorts();
-        while(ports.hasMoreElements()) {
-            System.out.println(SerialDevice.getPortDescription(ports.nextElement()));
-        }
-        
-        SerialDevice port = new SerialDevice("/dev/tty.usbserial");//-FTC8JJO1");
-        SNETDriver drv = new SNETDriver(port);
-        drv.addEventListener(new Main());
-        drv.start();
-        while(counter < 10) {
-            counter++;
-            Thread.sleep(1000);
-        }
-        drv.stop();
-    }
+/**
+ *
+ * @author cnoviello
+ */
+public interface SNETDriverEventListener extends EventListener {
     
-    public void driverEvent(SNETDriverEvent evt) {
-        DataMessage message = evt.getMessage();
-        System.out.println(message.toString());
-    }
-
+    public abstract void driverEvent(SNETDriverEvent evt);
+    
 }

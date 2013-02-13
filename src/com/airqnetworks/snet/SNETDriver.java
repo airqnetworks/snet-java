@@ -1,13 +1,30 @@
 /**
+ * Software License Agreement
+ *
  * (C)Copyright 2013, AirQ Networks s.r.l. (http://www.airqnetworks.com)
+ * All rights reserved.
  *
- * This software is part of the sNET adapter for Java programming language. For
- * more information about sNET protocol, see
- * http://wiki.airqnetworks.com/index.php/SNET_Protocol
+ * AirQ Networks licenses to you the right to use, modify, copy, and
+ * distribute this software/library when used in conjuction with an 
+ * AirQ Networks trasceiver to interface AirQ Networks wireless devices
+ * (sensors, control boards and other devices produced by AirQ Networks).
+ *
+ * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+ * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+ * AIRQ NETWORKS BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+ * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+ * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+ * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+ * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+ * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
  *
- * This software is released under the terms of the GNU LGPL license. See
- * http://www.gnu.org/licenses/lgpl.html for more information.
+ * Author               Date    Comment
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Carmine Noviello    13/2/13	Original
  */
 
 package com.airqnetworks.snet;
@@ -20,16 +37,41 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @author cnoviello
  */
-public class Driver implements Runnable {
+public class SNETDriver implements Runnable {
+
+    class CallListener implements Runnable {
+        private SNETDriverEventListener listener;
+        private DataMessage message;
+        private SNETDriver driver;
+        
+        public CallListener(SNETDriverEventListener listener, SNETDriver driver, DataMessage message)
+        {
+            this.listener = listener;
+            this.message = message;
+            this.driver = driver;
+        }
+        
+        public void run() {
+            listener.driverEvent(new SNETDriverEvent(driver, message));
+        }
+        
+    }    
 
     private Thread innerThread = null;
     private Boolean wantClose = false;
     private Device device;
     public LinkedBlockingQueue<DataMessage> messages;
+    private List<SNETDriverEventListener> listeners;
     
-    public Driver(Device dev) {
+    public SNETDriver(Device dev) {
         device = dev;
         messages = new LinkedBlockingQueue<DataMessage>();
+        listeners = new ArrayList<SNETDriverEventListener>();
+    }
+    
+    public void addEventListener(SNETDriverEventListener listener)
+    {
+        listeners.add(listener);
     }
     
     public void start() {
@@ -90,10 +132,12 @@ public class Driver implements Runnable {
         }
         return -1;
     }
-    
-    public void onData() {
 
+    public void removeEventListener(SNETDriverEventListener listener)
+    {
+        listeners.remove(listener);
     }
+    
     
     @Override
     public void run() {
@@ -107,7 +151,11 @@ public class Driver implements Runnable {
                 if(len > 0) {
                     message = MessageHandler.message(data, len, this);
                     messages.add(message);
-                    onData();
+                    for(int i=0; i<listeners.size(); i++)
+                    {
+                        Thread listenerThread = new Thread(new CallListener(listeners.get(i), this, message));
+                        listenerThread.start();
+                    }
                 }
             } catch (IOException ex) {
                 
