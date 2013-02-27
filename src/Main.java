@@ -57,7 +57,8 @@ public class Main implements SNETDriverEventListener {
     
     public void driverEvent(SNETDriverEvent evt) {
         DataMessage message = evt.getMessage();
-        System.out.println(message.toString());
+        System.out.println(((AIRQ101Message)message).getTEMP());
+        System.out.println(((AIRQ101Message)message).getBATT());        
     }
 
 }

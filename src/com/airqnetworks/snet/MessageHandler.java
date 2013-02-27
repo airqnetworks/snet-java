@@ -7,7 +7,8 @@
  * AirQ Networks licenses to you the right to use, modify, copy, and
  * distribute this software/library when used in conjuction with an 
  * AirQ Networks trasceiver to interface AirQ Networks wireless devices
- * (sensors, control boards and other devices produced by AirQ Networks).
+ * (transceivers, sensors, control boards and other devices produced 
+ * by AirQ Networks). Other uses, either express or implied, are prohibited.
  *
  * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
@@ -21,12 +22,8 @@
  * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
- *
- * Author               Date    Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Carmine Noviello    13/2/13	Original
  */
-
+	 
 package com.airqnetworks.snet;
 
 /**
@@ -35,6 +32,7 @@ package com.airqnetworks.snet;
  */
 public class MessageHandler {
     public static final int DEV_TYPE_AIRQ101 = 101;
+    public static final int DEV_TYPE_AIRQ191 = 191;
     public static final int DEV_TYPE_AIRQ300 = 300;
             
     public static DataMessage message(byte[] rawmessage, int len, SNETDriver driver)
@@ -46,6 +44,7 @@ public class MessageHandler {
                 return new AIRQ300Message(rawmessage, len, driver);
                 
             case DEV_TYPE_AIRQ101:
+            case DEV_TYPE_AIRQ191:
                 return new AIRQ101Message(rawmessage, len, driver);
         }
         

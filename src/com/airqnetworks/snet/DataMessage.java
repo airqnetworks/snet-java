@@ -7,7 +7,8 @@
  * AirQ Networks licenses to you the right to use, modify, copy, and
  * distribute this software/library when used in conjuction with an 
  * AirQ Networks trasceiver to interface AirQ Networks wireless devices
- * (sensors, control boards and other devices produced by AirQ Networks).
+ * (transceivers, sensors, control boards and other devices produced 
+ * by AirQ Networks). Other uses, either express or implied, are prohibited.
  *
  * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
@@ -21,12 +22,8 @@
  * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
- *
- * Author               Date    Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Carmine Noviello    13/2/13	Original
  */
-
+	 
 package com.airqnetworks.snet;
 
 import java.util.ArrayList;
@@ -46,17 +43,19 @@ public class DataMessage {
     protected static final int MSG_TYPE_LEN       = 1;
     protected static final int MSG_DID            = 9; /* Device ID */
     protected static final int MSG_DID_LEN        = 4;
-    protected static final int MSG_PKT            = 14;/* Packet number */
+    protected static final int MSG_PKT            = 14; /* Packet number */
     protected static final int MSG_PKT_LEN        = 1;
-    protected static final int MSG_RSSI           = 15; /* RSSI */
+    protected static final int MSG_FWD            = 15; /* Forward info */
+    protected static final int MSG_FWD_LEN        = 1;
+    protected static final int MSG_RSSI           = 16; /* RSSI */
     protected static final int MSG_RSSI_LEN       = 1;
-    protected static final int MSG_LQI            = 16; /* LQI */
+    protected static final int MSG_LQI            = 17; /* LQI */
     protected static final int MSG_LQI_LEN        = 1;
-    protected static final int MSG_DATA           = 17; /* DATA */
+    protected static final int MSG_DATA           = 18; /* DATA */
     private   static final int MSG_DATA_LEN       = 0; /* Use getDataLen() instead of this */
     
-    protected static final int MSG_FORWARDED      = 0x10; 
-    
+    protected static final int DATA_MESSAGE_LEN   = 20;
+        
     protected SNETDriver driver = null;
     protected byte[] rawmessage = null;
     public int length = 0;
@@ -70,7 +69,7 @@ public class DataMessage {
     public static Boolean checkMessage(byte[] message, int len) {
         String preamble;
         
-        if(len >= 19) /* Data messages are at least 19 byte long */
+        if(len >= DATA_MESSAGE_LEN) /* Data messages are at least 19 byte long */
         {
             preamble = new String(message, 0, 4);
             if(!preamble.equals("AIRQ"))
@@ -88,13 +87,13 @@ public class DataMessage {
         return devaddr;
     }
 
-    public Object[] getData()
+    public byte[] getData()
     {
-        ArrayList<Byte> data = new ArrayList<Byte>();
+        byte[] data = new byte[getDataLen()];
         for(int i = this.MSG_DATA; i < DataMessage.MSG_DATA + getDataLen(); i++)
-            data.add(rawmessage[i]);        
+            data[i-this.MSG_DATA] = rawmessage[i];        
         
-        return data.toArray();
+        return data;
     }
     
     public byte getData(int i) throws java.lang.ArrayIndexOutOfBoundsException {
@@ -105,7 +104,7 @@ public class DataMessage {
     
     public int getDataLen()
     {
-        return DataMessage.MSG_DATA_LEN;
+        return this.length - DATA_MESSAGE_LEN;
     }
     
     public int getDeviceType()
@@ -151,9 +150,9 @@ public class DataMessage {
         }
     }
     
-    public Boolean isForwarded()
+    public int getFWD()
     {
-        return (rawmessage[DataMessage.MSG_TYPE] & MSG_FORWARDED) == MSG_FORWARDED;
+        return rawmessage[DataMessage.MSG_FWD];
     }
     
     public String toString() {
@@ -172,7 +171,7 @@ public class DataMessage {
             output += Integer.toHexString(getData(i)) + ",";
         }
         output += getPOWER() ? "POWER" : "BATTERY";
-        output += "," + (isForwarded() ? "FORWARDED" : "DIRECT");
+        output += "," + (getFWD() > 0 ? "FORWARDED" : "DIRECT");
         
         Date d = new Date();
         output += "," + d.toString();

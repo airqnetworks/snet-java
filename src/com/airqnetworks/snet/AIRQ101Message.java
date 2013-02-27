@@ -7,7 +7,8 @@
  * AirQ Networks licenses to you the right to use, modify, copy, and
  * distribute this software/library when used in conjuction with an 
  * AirQ Networks trasceiver to interface AirQ Networks wireless devices
- * (sensors, control boards and other devices produced by AirQ Networks).
+ * (transceivers, sensors, control boards and other devices produced 
+ * by AirQ Networks). Other uses, either express or implied, are prohibited.
  *
  * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
@@ -21,26 +22,34 @@
  * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
- *
- * Author               Date    Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Carmine Noviello    13/2/13	Original
  */
-
+	 
 package com.airqnetworks.snet;
+
+import java.nio.*;
 
 /**
  *
  * @author cnoviello
  */
 public class AIRQ101Message extends DataMessage {
+    private float temp;
+    private int batt;
+    
     public AIRQ101Message(byte[] message, int len, SNETDriver driver) {
         super(message, len, driver);
+        
+        ByteBuffer buffer = ByteBuffer.wrap(getData());
+        buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        temp = buffer.getFloat();
+        batt = buffer.getShort();
     }
     
-    public float getTEMP()
-    { 
-        return 0;
-        //Float.intBitsToFloat();
+    public int getBATT() { 
+        return batt;
+    }
+    
+    public float getTEMP() { 
+        return temp;
     }
 }

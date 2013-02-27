@@ -7,7 +7,8 @@
  * AirQ Networks licenses to you the right to use, modify, copy, and
  * distribute this software/library when used in conjuction with an 
  * AirQ Networks trasceiver to interface AirQ Networks wireless devices
- * (sensors, control boards and other devices produced by AirQ Networks).
+ * (transceivers, sensors, control boards and other devices produced 
+ * by AirQ Networks). Other uses, either express or implied, are prohibited.
  *
  * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
@@ -21,12 +22,8 @@
  * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
- *
- * Author               Date    Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Carmine Noviello    13/2/13	Original
  */
-
+	 
 package com.airqnetworks.snet;
 
 import java.util.EventListener;
